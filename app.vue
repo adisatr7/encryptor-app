@@ -29,13 +29,31 @@
           </option>
         </select>
 
-        <!-- Submit button -->
+        <!-- Tombol submit -->
         <section class="flex flex-row gap-[12px]">
-          <button type="submit" class="bg-white/10 hover:bg-purple-600 text-white font-bold py-2 px-4 w-full rounded-md backdrop-filter backdrop-blur duration-150">
+          <!-- Tombol untuk enkripsi -->
+          <button
+            type="submit"
+            @click.prevent="handleEncrypt"
+            :disabled="selectedEncryptionType === encryptionTypes[0]"
+            :class="['text-white disabled:text-white/50 font-bold py-2 px-4 w-full rounded-md duration-150',
+              selectedEncryptionType === encryptionTypes[0]
+                ? 'bg-white/10'                                                       // Style jika tombol tidak dapat diklik (disabled)
+                : 'bg-white/10 hover:bg-purple-600 backdrop-filter backdrop-blur'   // Style jika tombol dapat diklik
+            ]">
             Enkripsi
           </button>
 
-          <button type="submit" class="bg-white/10 hover:bg-purple-600 text-white font-bold py-2 px-4 w-full rounded-md backdrop-filter backdrop-blur duration-150">
+          <!-- Tombol untuk dekripsi -->
+          <button
+            type="submit"
+            @click.prevent="handleDecrypt"
+            :disabled="selectedEncryptionType === encryptionTypes[0]"
+            :class="['text-white disabled:text-white/50 font-bold py-2 px-4 w-full rounded-md duration-150',
+              selectedEncryptionType === encryptionTypes[0]
+                ? 'bg-white/10'                                                       // Style jika tombol tidak dapat diklik (disabled)
+                : 'bg-white/10 hover:bg-purple-600 backdrop-filter backdrop-blur'   // Style jika tombol dapat diklik
+            ]">
             Dekripsi
           </button>
         </section>
@@ -56,6 +74,8 @@
 </template>
 
 <script setup lang="ts">
+import { MyBlockCipher } from "./models/MyBlockCipher"
+
   /**
    * Daftar jenis enkripsi yang tersedia.
    */
@@ -79,19 +99,27 @@
   /**
    * Untuk menyimpan hasil enkripsi.
    */
-  const result = ref<string>("Test123")
+  const result = ref<string>("")
 
   /**
    * Fungsi yang akan dijalankan ketika pengguna menekan tombol enkripsi.
    */
   function handleEncrypt() {
+    const cipher = new MyBlockCipher("secretkeygoeshere", selectedEncryptionType.value)
+    const encoder = new TextEncoder()
+    const encodedInput = encoder.encode(userInput.value)
 
+    result.value = cipher.encrypt(encodedInput).toString()
   }
 
   /**
    * Fungsi yang akan dijalankan ketika pengguna menekan tombol dekripsi.
    */
   function handleDecrypt() {
+    const cipher = new MyBlockCipher("secretkeygoeshere", selectedEncryptionType.value)
+    const decoder = new TextDecoder()
+    const decodedInput = Uint8Array.from(result.value.split(",").map(Number))
 
+    result.value = decoder.decode(cipher.decrypt(decodedInput))
   }
 </script>
